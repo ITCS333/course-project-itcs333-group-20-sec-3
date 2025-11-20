@@ -9,6 +9,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
+    <title>Admin Portal</title>
+    <link rel="stylesheet" type="text/css" href="../common/styles.css">
     <!-- TODO: Add the 'meta' tag for character encoding (UTF-8). -->
 
     <!-- TODO: Add the responsive 'viewport' meta tag. -->
@@ -20,6 +23,101 @@
 </head>
 <body>
 
+    <header>
+        <h1>Admin Portal</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Change Your Password</h2>
+            <form action="#">
+                <fieldset>
+                    <legend>Password Update</legend>
+                    <label for="current-password"></label>
+                    <input type="password" id="current-password" required>
+
+                    <label for="new-password"></label>
+                    <input type="password" id="new-password" minlength="8" required>
+
+                    <label for="confirm-password"></label>
+                    <input type="password" id="confirm-password" required>
+
+                    <button type="submit" id="change">Update Password</button>
+                </fieldset>
+            </form>
+        </section>
+
+        <section>
+            <h2>Manage Students</h2>
+
+            <details>
+                <summary>Add New Student</summary>
+
+                <form action="#">
+                    <fieldset>
+                        <legend>New Student Information</legend>
+
+                        <label for="student-name"></label>
+                        <input type="text" id="student-name" required>
+
+                        <label for="student-id"></label>
+                        <input type="text" id="student-id" required>
+
+                        <label for="student-email"></label>
+                        <input type="email" id="student-email" required>
+
+                        <label for="default-password"></label>
+                        <input type="text" id="default-password" value="password123" required>
+
+                        <button type="submit" id="add">Add Student</button>
+                    </fieldset>
+                </form>
+            </details>
+
+
+            <h3>Registered Students</h3>
+            <table id="student-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Student ID</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>Fatima</td>
+                        <td>202309736</td>
+                        <td>f@gmail.com</td>
+                        <td>
+                            <button>Edit</button>
+                            <button>Delete</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Maryam</td>
+                        <td>202338492</td>
+                        <td>m@gmail.com</td>
+                        <td>
+                            <button>Edit</button>
+                            <button>Delete</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>John</td>
+                        <td>202306329</td>
+                        <td>j@gmail.com</td>
+                        <td>
+                            <button>Edit</button>
+                            <button>Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </section>
+    </main>
     <!-- TODO: Create a 'header' element for the top of the page. -->
         <!-- TODO: Inside the header, add a main heading (e.g., 'h1') with the text "Admin Portal". -->
     <!-- End of the header. -->
