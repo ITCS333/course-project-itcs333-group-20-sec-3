@@ -25,6 +25,26 @@
  */
 function createWeekArticle(week) {
   // ... your implementation here ...
+  const article = document.createElement('article');
+
+  const h2 = document.createElement('h2');
+  h2.textContent = week.title;
+  article.appendChild(h2);
+
+  const startDateP = document.createElement('p');
+  startDateP.textContent = "Start Date: " + week.startDate;
+  article.appendChild(startDateP);
+
+  const descriptionP = document.createElement('p');
+  descriptionP.textContent = week.description;
+  article.appendChild(descriptionP);
+
+  const detailsLink = document.createElement('a');
+  detailsLink.href = `details.html?id=${week.id}`;
+  detailsLink.textContent = "View Details & Discussion";
+  article.appendChild(detailsLink);
+
+  return article;
 }
 
 /**
@@ -40,6 +60,15 @@ function createWeekArticle(week) {
  */
 async function loadWeeks() {
   // ... your implementation here ...
+  const response = await fetch('weeks.json');
+  const weeks = await response.json();
+
+  listSection.innerHTML = '';
+
+  weeks.forEach(week => {
+    const weekArticle = createWeekArticle(week);
+    listSection.appendChild(weekArticle);
+  });             
 }
 
 // --- Initial Page Load ---
