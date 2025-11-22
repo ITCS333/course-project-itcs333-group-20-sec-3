@@ -17,6 +17,7 @@
   3. Implement the TODOs below.
 */
 
+
 // --- Global Data Store ---
 // These will hold the data related to *this* specific week.
 let currentWeekId = null;
@@ -90,6 +91,7 @@ function renderComments() {
  */
 function handleAddComment(event) {
   // ... your implementation here ...
+  
 }
 
 /**
