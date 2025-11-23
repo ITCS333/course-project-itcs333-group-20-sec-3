@@ -283,7 +283,7 @@ function updateStudent($db, $data) {
     $checkStmt->execute();
 
     if (!$checkStmt->fetch()){
-        sendResponse(['success' => false, 'message' => 'Student not found'], 400);
+        sendResponse(['success' => false, 'message' => 'Student not found'], 404);
         return;
     }
     

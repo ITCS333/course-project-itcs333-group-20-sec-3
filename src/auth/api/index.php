@@ -148,10 +148,6 @@ try{
     // NOTE: This assumes passwords are stored as hashes using password_hash()
     // Never store passwords in plain text!
 
-    if (!$user){
-        //should i log an error??
-    }
-
     if ($user && password_verify($password, $user['password'])){
 
         // --- Handle Successful Authentication ---

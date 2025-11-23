@@ -29,7 +29,7 @@
     <main>
         <section>
             <h2>Change Your Password</h2>
-            <form action="#">
+            <form action="#" id="password-form">
                 <fieldset>
                     <legend>Password Update</legend>
                     <label for="current-password"></label>
@@ -49,10 +49,13 @@
         <section>
             <h2>Manage Students</h2>
 
+            <label for="search-input">Search Students</label>
+            <input type="text" id="search-input" placeholder="Search by name..">
+
             <details>
                 <summary>Add New Student</summary>
 
-                <form action="#">
+                <form action="#" id="add-student-form">
                     <fieldset>
                         <legend>New Student Information</legend>
 
@@ -78,41 +81,15 @@
             <table id="student-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Student ID</th>
-                        <th>Email</th>
+                        <th data-sort="name">Name</th>
+                        <th data-sort="id">Student ID</th>
+                        <th data-sort="email">Email</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
 
-                <tbody>
-                    <tr>
-                        <td>Fatima</td>
-                        <td>202309736</td>
-                        <td>f@gmail.com</td>
-                        <td>
-                            <button>Edit</button>
-                            <button>Delete</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Maryam</td>
-                        <td>202338492</td>
-                        <td>m@gmail.com</td>
-                        <td>
-                            <button>Edit</button>
-                            <button>Delete</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>John</td>
-                        <td>202306329</td>
-                        <td>j@gmail.com</td>
-                        <td>
-                            <button>Edit</button>
-                            <button>Delete</button>
-                        </td>
-                    </tr>
+                <tbody id="student-table-body">
+                    
                 </tbody>
             </table>
 
@@ -236,7 +213,7 @@
         <!-- End of the student management section. -->
 
     <!-- End of the main content area. -->
-
+<script src="manage_users.js" defer></script>
 </body>
 </html>
 

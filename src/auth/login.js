@@ -104,7 +104,7 @@ function handleLogin(event) {
     return;
   }
 
-  displayMessage("Login successful", "success");
+  displayMessage("Login successful!", "success");
 
   emailInput.value = "";
   passwordInput.value = "";
