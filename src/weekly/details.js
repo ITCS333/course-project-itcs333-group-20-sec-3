@@ -17,6 +17,7 @@
   3. Implement the TODOs below.
 */
 
+
 // --- Global Data Store ---
 // These will hold the data related to *this* specific week.
 let currentWeekId = null;
@@ -36,6 +37,9 @@ let currentComments = [];
  */
 function getWeekIdFromURL() {
   // ... your implementation here ...
+  const queryString = window.location.search;
+  const urlSearchParams = new URLSearchParams(queryString);
+  return urlSearchParams.get('id');   
 }
 
 /**
@@ -51,6 +55,22 @@ function getWeekIdFromURL() {
  */
 function renderWeekDetails(week) {
   // ... your implementation here ...
+  weekTitle.textContent = week.title;
+  weekStartDate.textContent = "Starts on: " + week.startDate;
+  weekDescription.textContent = week.description;
+
+  // Clear existing links
+  weekLinksList.innerHTML = '';
+
+  // Add new links
+  week.links.forEach(link => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = link;
+    a.textContent = link;
+    li.appendChild(a);
+    weekLinksList.appendChild(li);
+  }); 
 }
 
 /**
@@ -61,6 +81,16 @@ function renderWeekDetails(week) {
  */
 function createCommentArticle(comment) {
   // ... your implementation here ...
+  const article = document.createElement('article');
+  const p = document.createElement('p');
+  p.textContent = comment.text;
+  article.appendChild(p);
+
+  const footer = document.createElement('footer');
+  footer.textContent = `Posted by: ${comment.author}`;
+  article.appendChild(footer);
+
+  return article;
 }
 
 /**
@@ -73,6 +103,12 @@ function createCommentArticle(comment) {
  */
 function renderComments() {
   // ... your implementation here ...
+  commentList.innerHTML = '';
+
+  currentComments.forEach(comment => {
+    const commentArticle = createCommentArticle(comment);
+    commentList.appendChild(commentArticle);
+  }); 
 }
 
 /**
@@ -90,6 +126,20 @@ function renderComments() {
  */
 function handleAddComment(event) {
   // ... your implementation here ...
+  event.preventDefault();
+  const commentText = newCommentText.value.trim();
+  if (commentText === '') {
+    return;
+  }
+
+  const newComment = {
+    author: 'Student',
+    text: commentText
+  };
+
+  currentComments.push(newComment);
+  renderComments();
+  newCommentText.value = '';
 }
 
 /**
@@ -111,6 +161,30 @@ function handleAddComment(event) {
  */
 async function initializePage() {
   // ... your implementation here ...
+  currentWeekId = getWeekIdFromURL();
+  if (!currentWeekId) {
+    weekTitle.textContent = "Week not found.";
+    return;
+  }
+
+  const [weeksResponse, commentsResponse] = await Promise.all([
+    fetch('weeks.json'),
+    fetch('week-comments.json')
+  ]);
+
+  const weeks = await weeksResponse.json();
+  const commentsData = await commentsResponse.json();
+
+  const week = weeks.find(w => w.id === currentWeekId);
+  currentComments = commentsData[currentWeekId] || [];
+
+  if (week) {
+    renderWeekDetails(week);
+    renderComments();
+    commentForm.addEventListener('submit', handleAddComment);
+  } else {
+    weekTitle.textContent = "Week not found.";
+  }
 }
 
 // --- Initial Page Load ---
