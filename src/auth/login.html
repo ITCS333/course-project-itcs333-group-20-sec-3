@@ -10,6 +10,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="../common/styles.css">
     <!-- TODO: Add the 'meta' tag to specify the character encoding for the document to be UTF-8. -->
 
 
@@ -25,11 +28,32 @@
 
 
 </head>
-<body <!-- TODO: Add any styling to the 'body' tag to center the login form on the page. -->>
+<!-- TODO: Add any styling to the 'body' tag to center the login form on the page. -->
+<body>
 
     <!-- This will be the main content area of the page. -->
     <!-- TODO: Use the 'main' element to contain the login form, as it represents the primary content of the document. -->
+    <main>
+        <section>
+            <h1>Welcome Back!</h1>
 
+            <form action="#" id="login-form">
+                <fieldset>
+                    <legend>Secure Login</legend>
+
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required>
+
+                    <label for="password">Password</label>
+                    <input type="password" id="password" minlength="8" required>
+
+                    <button type="submit" id="login">Log In</button>
+                </fieldset>
+
+                <div id="message-container"></div>
+            </form>
+        </section>
+    </main>
         <!-- This 'section' groups the related content of the login form. -->
         <!-- TODO: Create a 'section' element to act as the login card. -->
 
@@ -82,7 +106,7 @@
         <!-- End of the login section. -->
 
     <!-- End of the main content area. -->
-
+<script src="login.js" defer></script>
 </body>
 </html>
 
