@@ -17,8 +17,10 @@ let assignments = [];
 
 // --- Element Selections ---
 // TODO: Select the assignment form ('#assignment-form').
+const assignmentForm = document.getElementById("assignment-form");
 
 // TODO: Select the assignments table body ('#assignments-tbody').
+const assignmentsTableBody = document.getElementById("assignments-tbody");
 
 // --- Functions ---
 
@@ -33,7 +35,34 @@ let assignments = [];
  * - A "Delete" button with class "delete-btn" and `data-id="${id}"`.
  */
 function createAssignmentRow(assignment) {
-  // ... your implementation here ...
+  const tr = document.createElement("tr");
+
+  const tdTitle = document.createElement("td");
+  tdTitle.textContent = assignment.title;
+
+  const tdDue = document.createElement("td");
+  tdDue.textContent = assignment.dueDate;
+
+  const tdActions = document.createElement("td");
+
+  const editBtn = document.createElement("button");
+  editBtn.textContent = "Edit";
+  editBtn.classList.add("edit-btn");
+  editBtn.dataset.id = assignment.id;
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "Delete";
+  deleteBtn.classList.add("delete-btn");
+  deleteBtn.dataset.id = assignment.id;
+
+  tdActions.appendChild(editBtn);
+  tdActions.appendChild(deleteBtn);
+
+  tr.appendChild(tdTitle);
+  tr.appendChild(tdDue);
+  tr.appendChild(tdActions);
+
+  return tr;
 }
 
 /**
@@ -45,7 +74,13 @@ function createAssignmentRow(assignment) {
  * append the resulting <tr> to `assignmentsTableBody`.
  */
 function renderTable() {
-  // ... your implementation here ...
+  assignmentsTableBody.innerHTML = "";
+
+  for (let i = 0; i < assignments.length; i++) {
+    const asg = assignments[i];
+    const row = createAssignmentRow(asg);
+    assignmentsTableBody.appendChild(row);
+  }
 }
 
 /**
@@ -60,7 +95,24 @@ function renderTable() {
  * 6. Reset the form.
  */
 function handleAddAssignment(event) {
-  // ... your implementation here ...
+  event.preventDefault();
+
+  const title = document.getElementById("assignment-title").value;
+  const description = document.getElementById("assignment-description").value;
+  const dueDate = document.getElementById("assignment-due-date").value;
+  const files = document.getElementById("assignment-files").value;
+
+  const newAssignment = {
+    id: `asg_${Date.now()}`,
+    title,
+    description,
+    dueDate,
+    files
+  };
+
+  assignments.push(newAssignment);
+  renderTable();
+  assignmentForm.reset();
 }
 
 /**
@@ -74,7 +126,19 @@ function handleAddAssignment(event) {
  * 4. Call `renderTable()` to refresh the list.
  */
 function handleTableClick(event) {
-  // ... your implementation here ...
+   if (event.target.classList.contains("delete-btn")) {
+    const id = event.target.dataset.id;
+
+    const newList = [];
+    for (let i = 0; i < assignments.length; i++) {
+      if (assignments[i].id !== id) {
+        newList.push(assignments[i]);
+      }
+    }
+    assignments = newList;
+
+    renderTable();
+  }
 }
 
 /**
@@ -88,7 +152,13 @@ function handleTableClick(event) {
  * 5. Add the 'click' event listener to `assignmentsTableBody` (calls `handleTableClick`).
  */
 async function loadAndInitialize() {
-  // ... your implementation here ...
+  const response = await fetch("assignments.json");
+  assignments = await response.json();
+
+  renderTable();
+
+  assignmentForm.addEventListener("submit", handleAddAssignment);
+  assignmentsTableBody.addEventListener("click", handleTableClick);
 }
 
 // --- Initial Page Load ---
