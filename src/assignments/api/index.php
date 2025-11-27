@@ -63,9 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // TODO: Create database connection
 $host = 'localhost';
-$dbname = 'your_db_name';
-$user = 'your_db_user';
-$pass = 'your_db_password';
+$dbname = 'course';
+$user = 'admin';
+$pass = 'password123';
 try {
     $db = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
 
