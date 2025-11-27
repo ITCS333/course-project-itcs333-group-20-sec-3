@@ -17,9 +17,9 @@ let topics = [];
 
 // --- Element Selections ---
 // TODO: Select the new topic form ('#new-topic-form').
-
+const newTopicForm = document.querySelector('#new-topic-form');
 // TODO: Select the topic list container ('#topic-list-container').
-
+const topicListContainer = document.querySelector('#topic-list-container');
 // --- Functions ---
 
 /**
