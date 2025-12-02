@@ -48,30 +48,47 @@
 // Allow cross-origin requests (CORS) if needed
 // Allow specific HTTP methods (GET, POST, PUT, DELETE, OPTIONS)
 // Allow specific headers (Content-Type, Authorization)
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 
 // TODO: Handle preflight OPTIONS request
 // If the request method is OPTIONS, return 200 status and exit
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit(0);
+}
 
 
 // TODO: Include the database connection class
 // Assume the Database class has a method getConnection() that returns a PDO instance
+require_once '../../config/database.php';
+$database = new Database();
 
 
 // TODO: Get the PDO database connection
 // $db = $database->getConnection();
+$db = $database->getConnection();
 
 
 // TODO: Get the HTTP request method
 // Use $_SERVER['REQUEST_METHOD']
+$method = $_SERVER['REQUEST_METHOD'];
 
 
 // TODO: Get the request body for POST and PUT requests
 // Use file_get_contents('php://input') to get raw POST data
 // Decode JSON data using json_decode()
+$input = file_get_contents('php://input');
+$data = json_decode($input, true);
 
 
 // TODO: Parse query parameters for filtering and searching
+$resource = isset($_GET['resource']) ? $_GET['resource'] : null;
+$id = isset($_GET['id']) ? $_GET['id'] : null;
+$topicId = isset($_GET['topic_id']) ? $_GET['topic_id'] : null;
 
 
 // ============================================================================
@@ -114,7 +131,31 @@ function getAllTopics($db) {
     
     // TODO: Return JSON response with success status and data
     // Call sendResponse() helper function or echo json_encode directly
+    $sql = "SELECT topic_id, subject, message, author, DATE(created_at) as created_at FROM topics";
+    if (!empty($_GET['search'])) {
+        $search = '%' . $_GET['search'] . '%';
+        $sql .= " WHERE subject LIKE :search OR message LIKE :search OR author LIKE :search";
+        $params[':search'] = $search;
+    }
+    $sortFields = ['subject', 'author', 'created_at'];
+    $sort = in_array($_GET['sort'] ?? '', $sortFields) ? $_GET['sort'] : 'created_at';
+    $order = (isset($_GET['order']) && strtolower($_GET['order']) === 'asc') ? 'ASC' : 'DESC';
+    $sql .= " ORDER BY $sort $order";
+
+    $stmt = $db->prepare($sql);
+    if (!empty($params)) {
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+    }
+    $stmt->execute();
+    $topics = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    sendResponse([
+        'success' => true,
+        'data' => $topics
+    ]);
 }
+
 
 
 /**
@@ -140,6 +181,21 @@ function getTopicById($db, $topicId) {
     // TODO: Check if topic exists
     // If topic found, return success response with topic data
     // If not found, return error with 404 status
+    if (!$topicId) {
+        sendResponse([
+            'success' => false,
+            'message' => 'Topic ID is required'
+        ], 400);
+    }
+    $stmt = $db->prepare("SELECT topic_id, subject, message, author, DATE(created_at) as created_at FROM topics WHERE topic_id = :topic_id");
+    $stmt->bindValue(':topic_id', $topicId);
+    $stmt->execute();
+    $topic = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($topic) {
+        sendResponse(['success'=>true,'data'=>$topic]);
+    } else {
+        sendResponse(['success'=>false,'message'=>'Topic not found'],404);
+    }
 }
 
 
@@ -179,6 +235,22 @@ function createTopic($db, $data) {
     // If yes, return success response with 201 status (Created)
     // Include the topic_id in the response
     // If no, return error with 500 status
+    $requiredFields = ['topic_id', 'subject', 'message', 'author'];
+    foreach ($requiredFields as $field) {
+        if (empty($data[$field])) {
+            sendResponse([
+                'success' => false,
+                'message' => "$field is required"
+            ], 400);
+        }
+    }
+    $topicId = sanitizeInput($data['topic_id']);
+    $subject = sanitizeInput($data['subject']);
+    $message = sanitizeInput($data['message']);
+    $author = sanitizeInput($data['author']);
+
+    $che
+
 }
 
 
