@@ -13,6 +13,7 @@
 
 // --- Element Selections ---
 // TODO: Select the section for the assignment list ('#assignment-list-section').
+const listSection = document.getElementById("assignment-list-section");
 
 // --- Functions ---
 
@@ -24,7 +25,27 @@
  * This is how the detail page will know which assignment to load.
  */
 function createAssignmentArticle(assignment) {
-  // ... your implementation here ...
+  const article = document.createElement("article");
+
+  const h2 = document.createElement("h2");
+  h2.textContent = assignment.title;
+
+  const pDue = document.createElement("p");
+  pDue.textContent = `Due: ${assignment.dueDate}`;
+
+  const pDesc = document.createElement("p");
+  pDesc.textContent = assignment.description;
+
+  const link = document.createElement("a");
+  link.href = `details.html?id=${assignment.id}`;
+  link.textContent = "View Details & Discussion";
+
+  article.appendChild(h2);
+  article.appendChild(pDue);
+  article.appendChild(pDesc);
+  article.appendChild(link);
+
+  return article;
 }
 
 /**
@@ -39,7 +60,16 @@ function createAssignmentArticle(assignment) {
  * - Append the returned <article> element to `listSection`.
  */
 async function loadAssignments() {
-  // ... your implementation here ...
+  const response = await fetch("assignments.json"); 
+  const assignments = await response.json(); 
+
+  listSection.innerHTML = ""; 
+
+  for (let i = 0; i < assignments.length; i++) {
+    const asg = assignments[i];
+    const article = createAssignmentArticle(asg);
+    listSection.appendChild(article);
+  }
 }
 
 // --- Initial Page Load ---
