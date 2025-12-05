@@ -24,6 +24,7 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Credentials: true');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
@@ -93,10 +94,27 @@ if (strlen($password) < 8) {
 }
 
 
+
 // --- Database Connection ---
 // TODO: Get the database connection using the provided function
 // Assume getDBConnection() returns a PDO instance with error mode set to exception
 // The function is defined elsewhere (e.g., in a config file or db.php)
+function getDBConnection() {
+    $host = 'localhost';
+    $db   = 'course';
+    $user = 'admin';
+    $pass = 'password123';
+    $dsn = "mysql:host=$host;dbname=$db;";
+    
+    try {
+        $pdo = new PDO($dsn, $user, $pass);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        return $pdo;
+    } catch (\PDOException $e) {
+        throw new \PDOException($e->getMessage(), (int)$e->getCode());
+    }
+}
+
 try{
     $pdo = getDBConnection();
 }catch (PDOException $e) {
@@ -118,7 +136,7 @@ try{
     // IMPORTANT: Use a placeholder (? or :email) for the email value
     // This prevents SQL injection attacks
 
-    $sql = "SELECT id, name, email, password FROM users WHERE email = :email";
+    $sql = "SELECT id, name, email, password, is_admin FROM users WHERE email = :email";
 
     // --- Prepare the Statement ---
     // TODO: Prepare the SQL statement using the PDO prepare method
@@ -160,6 +178,7 @@ try{
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['name'];
             $_SESSION['user_email'] = $user['email'];
+            $_SESSION['is_admin'] = (bool)$user['is_admin'];
             $_SESSION['logged_in'] = true;
         
             // TODO: Prepare a success response array
@@ -175,7 +194,8 @@ try{
                 'user' => [
                     'id' => $user['id'],
                     'name' => $user['name'],
-                    'email' => $user['email']
+                    'email' => $user['email'],
+                    'is_admin' => (bool)$user['is_admin']
                 ]
             ];
         

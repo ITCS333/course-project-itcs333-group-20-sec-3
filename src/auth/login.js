@@ -12,6 +12,8 @@
   
   3. Implement the JavaScript functionality as described in the TODO comments.
 */
+const API_URL = 'http://localhost:8000';
+const LOGIN_ENDPOINT = API_URL + '/auth/index.php';
 
 // --- Element Selections ---
 // We can safely select elements here because 'defer' guarantees
@@ -26,6 +28,29 @@ let passwordInput = document.getElementById("password");
 // TODO: Select the message container element by its ID.
 let messageContainer = document.getElementById("message-container");
 // --- Functions ---
+
+
+async function apiLogin(email, password) {
+    const response = await fetch(LOGIN_ENDPOINT, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            email: email,
+            password: password
+        })
+    });
+    
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+}
+
+
 
 /**
  * TODO: Implement the displayMessage function.
@@ -88,8 +113,10 @@ function isValidPassword(password) {
  * - Call `displayMessage("Login successful!", "success")`.
  * - (Optional) Clear the email and password input fields.
  */
-function handleLogin(event) {
+async function handleLogin(event) {
   event.preventDefault();
+
+  displayMessage('', '');
 
   const email = emailInput.value.trim();
   const password = passwordInput.value.trim();
@@ -104,10 +131,41 @@ function handleLogin(event) {
     return;
   }
 
-  displayMessage("Login successful!", "success");
+  //disable during submission
+  const submitButton = document.getElementById("login");
+  submitButton.disabled = true;
 
-  emailInput.value = "";
-  passwordInput.value = "";
+  try {
+    const result = await apiLogin(email, password);
+
+    if (result.success) {
+      
+      displayMessage("Login successful!", "success");
+
+      emailInput.value = "";
+      passwordInput.value = "";
+
+      setTimeout(() => {
+        if (result.user.is_admin) {
+          window.location.href = "../admin/manage_users.html";
+        } else {
+          window.location.href = "../resources/details.html"; //CHECK WHERE STUDENNTS SHOULD GO ON LOGIN
+        }
+      }, 1500);
+
+      //redirect to users page or admin page based on credentials DOOOk
+    }else{
+      displayMessage(result.message || "Login failed. Please try again.", "error");
+      submitButton.disabled = false;
+    }
+
+  }catch (error) {
+    console.error('Login error:', error);
+    displayMessage("Network error. Please check your connection.", "error");
+    submitButton.disabled = false;
+  }
+
+
 }
 
 /**
