@@ -13,7 +13,7 @@
 
 // --- Element Selections ---
 // TODO: Select the section for the week list ('#week-list-section').
-
+const listSection = document.getElementById('week-list-section');
 // --- Functions ---
 
 /**
@@ -70,6 +70,7 @@ async function loadWeeks() {
     listSection.appendChild(weekArticle);
   });             
 }
+
 
 // --- Initial Page Load ---
 // Call the function to populate the page.
