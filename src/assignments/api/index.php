@@ -358,7 +358,7 @@ function deleteAssignment($db, $assignmentId) {
     }
     
     // TODO: Delete associated comments first (due to foreign key constraint)
-    $stmtComments = $db->prepare("DELETE FROM comments WHERE assignment_id=:id");
+    $stmtComments = $db->prepare("DELETE FROM comments_assignment WHERE assignment_id=:id");
     $stmtComments->bindValue(':id', $assignmentId);
     $stmtComments->execute();
     
@@ -402,7 +402,7 @@ function getCommentsByAssignment($db, $assignmentId) {
     }
     
     // TODO: Prepare SQL query to select all comments for the assignment
-    $stmt = $db->prepare("SELECT * FROM comments WHERE assignment_id=:assignment_id ORDER BY created_at ASC");
+    $stmt = $db->prepare("SELECT * FROM comments_assignment WHERE assignment_id=:assignment_id ORDER BY created_at ASC");
     
     // TODO: Bind the :assignment_id parameter
     $stmt->bindValue(':assignment_id', $assignmentId);
@@ -455,8 +455,7 @@ function createComment($db, $data) {
     }
     
     // TODO: Prepare INSERT query for comment
-    $stmt = $db->prepare("INSERT INTO comments (assignment_id, author, text, created_at)
-    VALUES (:assignment_id, :author, :text, NOW())");
+    $stmt = $db->prepare("INSERT INTO comments_assignment (assignment_id, author, text, created_at) VALUES (:assignment_id, :author, :text, NOW())");
     
     // TODO: Bind all parameters
     $stmt->bindValue(':assignment_id', $assignment_id);
@@ -491,7 +490,7 @@ function deleteComment($db, $commentId) {
     }
     
     // TODO: Check if comment exists
-    $stmtCheck = $db->prepare("SELECT * FROM comments WHERE id=:id");
+    $stmtCheck = $db->prepare("SELECT * FROM comments_assignment WHERE id=:id");
     $stmtCheck->bindValue(':id', $commentId);
     $stmtCheck->execute();
     if (!$stmtCheck->fetch(PDO::FETCH_ASSOC)) {
@@ -499,7 +498,7 @@ function deleteComment($db, $commentId) {
     }
     
     // TODO: Prepare DELETE query
-    $stmt = $db->prepare("DELETE FROM comments WHERE id=:id");
+    $stmt = $db->prepare("DELETE FROM comments_assignment WHERE id=:id");
     
     // TODO: Bind the :id parameter
     $stmt->bindValue(':id', $commentId);
