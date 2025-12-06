@@ -14,8 +14,8 @@
 let students = [];
 
 const API_URL = 'http://localhost:8000'; //MAKESURE DOOOO
-const API_ENDPOINT = API_URL + '/admin/index.php';
-// let currentUser = null;
+const API_ENDPOINT = '/src/admin/api/index.php';
+let currentUser = null;
 
 // --- Element Selections ---
 // We can safely select elements here because 'defer' guarantees
@@ -84,6 +84,12 @@ async function checkAuth() {
     }
 }
 
+function updateUIForUser(user) {
+    const adminHeader = document.querySelector("header h1");
+    if (adminHeader && user) {
+        adminHeader.textContent = `Admin Portal - Welcome, ${user.name}`;
+    }
+}
 
 async function apiRequest(method, params = {}, data = null) {
   const options = {
@@ -98,10 +104,15 @@ async function apiRequest(method, params = {}, data = null) {
     options.body = JSON.stringify(data);
   }
 
-  const url = new URL(API_ENDPOINT);
-  Object.keys(params).forEach(key => {
-    url.searchParams.append(key, params[key]);
-  });
+  let url = window.location.origin + API_ENDPOINT;
+
+  if (Object.keys(params).length > 0) {
+    const queryString = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      queryString.append(key, params[key]);
+    });
+    url += '?' + queryString.toString();
+  }
 
   try {
     const response = await fetch(url, options);
@@ -155,7 +166,7 @@ async function updateStudent(studentData) {
 }
 
 async function deleteStudent(studentId) {
-    const result = await apiRequest('DELETE', { student_id: studentId });
+    const result = await apiRequest('DELETE', { id: studentId });
     if (!result.success) {
         throw new Error(result.message || 'Failed to delete student');
     }
@@ -185,7 +196,8 @@ function createStudentRow(student) {
   emailCell.textContent = student.email;
   row.appendChild(emailCell);
 
-  const createdDate = new Date(user.created_at);
+  const createdDate = new Date(student.created_at);
+  const dateCell = document.createElement("td");
   dateCell.textContent = createdDate.toLocaleDateString() + ' ' + createdDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
   row.appendChild(dateCell);
 
@@ -194,12 +206,12 @@ function createStudentRow(student) {
   const editButton = document.createElement("button");
   editButton.textContent = "Edit";
   editButton.className = "edit-btn";
-  editButton.setAttribute("data-id", student.student_id);
+  editButton.setAttribute("data-id", student.id);
 
   const deleteButton = document.createElement("button");
   deleteButton.textContent = "Delete";
   deleteButton.className = "delete-btn";
-  deleteButton.setAttribute("data-id", student.student_id);
+  deleteButton.setAttribute("data-id", student.id);
 
   actionCell.appendChild(editButton);
   actionCell.appendChild(deleteButton);
@@ -259,9 +271,8 @@ async function handleChangePassword(event) {
   }
 
   try {
-
       await changePassword({
-            student_id: currentUser.id,
+            id: currentUser.id,
             current_password: currentPassword,
             new_password: newPassword
       });
@@ -460,7 +471,6 @@ function setupLogout() {
         logoutBtn.addEventListener('click', async () => {
             if (confirm('Are you sure you want to logout?')) {
                 try {
-                    // Optional: Call logout endpoint
                     await fetch(API_URL + '/auth/logout.php', {
                         method: 'POST',
                         credentials: 'include'
@@ -469,7 +479,6 @@ function setupLogout() {
                     console.error('Logout error:', error);
                 }
                 
-              //remove session!! DOOOO
                 window.location.href = "../auth/login.html";
             }
         });
