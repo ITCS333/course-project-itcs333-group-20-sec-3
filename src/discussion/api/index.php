@@ -131,7 +131,7 @@ function getAllTopics($db) {
     
     // TODO: Return JSON response with success status and data
     // Call sendResponse() helper function or echo json_encode directly
-    $sql = "SELECT topic_id, subject, message, author, DATE(created_at) as created_at FROM topics";
+    $sql = "SELECT id as topic_id, subject, message, author, DATE(created_at) as created_at FROM topics";
     if (!empty($_GET['search'])) {
         $search = '%' . $_GET['search'] . '%';
         $sql .= " WHERE subject LIKE :search OR message LIKE :search OR author LIKE :search";
@@ -187,7 +187,7 @@ function getTopicById($db, $topicId) {
             'message' => 'Topic ID is required'
         ], 400);
     }
-    $stmt = $db->prepare("SELECT topic_id, subject, message, author, DATE(created_at) as created_at FROM topics WHERE topic_id = :topic_id");
+    $stmt = $db->prepare("SELECT id as topic_id, subject, message, author, DATE(created_at) as created_at FROM topics WHERE id = :topic_id");
     $stmt->bindValue(':topic_id', $topicId);
     $stmt->execute();
     $topic = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -261,14 +261,14 @@ function createTopic($db, $data) {
         ], 409);
     }
 
-    $sql = "INSERT INTO topics (topic_id, subject, message, author) VALUES (:topic_id, :subject, :message, :author)";
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':topic_id', $topicId);    
+    $sql = "INSERT INTO topics (subject, message, author) VALUES (:subject, :message, :author)";
+    $stmt = $db->prepare($sql);    
     $stmt->bindValue(':subject', $subject);
     $stmt->bindValue(':message', $message);
     $stmt->bindValue(':author', $author);
 
     if ($stmt->execute()) {
+        $topicId = $db->lastInsertId();
         sendResponse([
             'success' => true,
             'message' => 'Topic created successfully',
@@ -357,7 +357,7 @@ function updateTopic($db, $data) {
         ], 400);
     }
 
-    $sql = "UPDATE topics SET " . implode(", ", $updates) . " WHERE topic_id = :topic_id";
+    $sql = "UPDATE topics SET " . implode(', ', $updates) . " WHERE id = :topic_id";
     $stmt = $db->prepare($sql);
 
     foreach ($params as $key => $value) {
@@ -441,7 +441,7 @@ function deleteTopic($db, $topicId) {
         $deleteRepliesStmt->bindValue(':topic_id', $topicId);
         $deleteRepliesStmt->execute();
 
-        $deleteTopicStmt = $db->prepare("DELETE FROM topics WHERE topic_id = :topic_id");
+        $deleteTopicStmt = $db->prepare("DELETE FROM topics WHERE id = :topic_id");
         $deleteTopicStmt->bindValue(':topic_id', $topicId);
         $deleteTopicStmt->execute();
 
@@ -496,7 +496,7 @@ function getRepliesByTopicId($db, $topicId) {
         ], 400);
     }
 
-    $sql = "SELECT reply_id, topic_id, text, author, DATE(created_at) as created_at FROM replies WHERE topic_id = :topic_id ORDER BY created_at ASC";
+    $sql = "SELECT id as reply_id, topic_id, text, author, DATE(created_at) as created_at FROM replies WHERE topic_id = :topic_id ORDER BY created_at ASC";
 
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':topic_id', $topicId);
@@ -583,14 +583,15 @@ function createReply($db, $data) {
         ], 409);
     }
 
-    $sql = "INSERT INTO replies (reply_id, topic_id, text, author) VALUES (:reply_id, :topic_id, :text, :author)";
+   $sql = "INSERT INTO replies (topic_id, text, author) VALUES (:topic_id, :text, :author)";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':reply_id', $replyId);
+    
     $stmt->bindValue(':topic_id', $topicId);
     $stmt->bindValue(':text', $text);
     $stmt->bindValue(':author', $author);
 
     if ($stmt->execute()) {
+        $replyId = $db->lastInsertId();
         sendResponse([
             'success' => true,
             'message' => 'Reply created successfully',
@@ -645,7 +646,7 @@ function deleteReply($db, $replyId) {
         ], 404);
     }
 
-    $deleteStmt = $db->prepare("DELETE FROM replies WHERE reply_id = :reply_id");
+    $deleteStmt = $db->prepare("DELETE FROM replies WHERE id = :reply_id");
     $deleteStmt->bindValue(':reply_id', $replyId);
 
     if ($deleteStmt->execute()) {

@@ -138,8 +138,9 @@ function handleTopicListClick(event) {
 async function loadAndInitialize() {
   // ... your implementation here ...
   try {
-    const response = await fetch('topics.json');
-    topics = await response.json();
+    const response = await fetch('/api/discussion.php?resource=topics');
+    const data = await response.json();
+    topics = data.topics || [];
     renderTopics();
     newTopicForm.addEventListener('submit', handleCreateTopic);
     topicListContainer.addEventListener('click', handleTopicListClick);
