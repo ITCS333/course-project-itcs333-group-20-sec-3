@@ -23,6 +23,15 @@ const weekForm = document.querySelector('#week-form');
 const weeksTableBody = document.querySelector('#weeks-tbody');
 
 // --- Functions ---
+async function loadWeeks() {
+  const res = await fetch("api/index.php?resource=weeks");
+  const data = await res.json();
+
+  console.log(data); // تتأكدين إنه شغال
+
+}
+
+loadWeeks();
 
 /**
  * TODO: Implement the createWeekRow function.

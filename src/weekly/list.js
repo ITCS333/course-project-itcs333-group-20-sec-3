@@ -21,6 +21,7 @@ const listSection = document.getElementById('week-list-section');
  * It takes one week object {id, title, startDate, description}.
  * It should return an <article> element matching the structure in `list.html`.
  * - The "View Details & Discussion" link's `href` MUST be set to `details.html?id=${id}`.
+
  * (This is how the detail page will know which week to load).
  */
 function createWeekArticle(week) {
@@ -70,7 +71,6 @@ async function loadWeeks() {
     listSection.appendChild(weekArticle);
   });             
 }
-
 
 // --- Initial Page Load ---
 // Call the function to populate the page.

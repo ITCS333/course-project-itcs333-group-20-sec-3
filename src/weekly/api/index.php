@@ -74,7 +74,8 @@ $database = new Database();
 //          $db = $database->getConnection();
 
 $db = $database->getConnection();
-
+$method = $_SERVER['REQUEST_METHOD'];
+$resource = $_GET['resource'] ?? 'weeks';
 
 // TODO: Get the HTTP request method
 // Use $_SERVER['REQUEST_METHOD']
@@ -107,6 +108,64 @@ if ($method === 'POST' || $method === 'PUT') {
 $resource = $_GET['resource'] ?? 'weeks';
 
 
+        if ($method === 'GET') {
+            if (isset($_GET['week_id'])) {
+                getWeekById($db, $_GET['week_id']);
+            } else {
+                getAllWeeks($db);
+            }
+        }
+
+        elseif ($method === 'POST') {
+            createWeek($db, $requestBody);
+        }
+
+        elseif ($method === 'PUT') {
+            updateWeek($db, $requestBody);
+        }
+
+        elseif ($method === 'DELETE') {
+            // في DELETE ممكن يجي week_id من البودي أو من الكويري
+            $weekId = $requestBody['week_id'] ?? ($_GET['week_id'] ?? null);
+            deleteWeek($db, $weekId);
+        }
+
+        else {
+            sendResponse(['error' => 'Method not allowed'], 405);
+        }
+    }
+
+    // ========== COMMENTS ROUTES ==========
+    elseif ($resource === 'comments') {
+
+        if ($method === 'GET') {
+            if (!isset($_GET['week_id'])) {
+                sendResponse(['error' => 'week_id is required'], 400);
+            }
+            getCommentsByWeek($db, $_GET['week_id']);
+        }
+
+        elseif ($method === 'POST') {
+            createComment($db, $requestBody);
+        }
+
+        elseif ($method === 'DELETE') {
+            $commentId = $requestBody['id'] ?? ($_GET['id'] ?? null);
+            deleteComment($db, $commentId);
+        }
+
+        else {
+            sendResponse(['error' => 'Method not allowed'], 405);
+        }
+    }
+
+    else {
+        sendResponse(['error' => 'Invalid resource'], 400);
+    }
+    
+} catch (Exception $e) {
+    sendResponse(['error' => $e->getMessage()], 500);
+}
 
 // ============================================================================
 // WEEKS CRUD OPERATIONS
