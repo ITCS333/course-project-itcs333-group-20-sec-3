@@ -318,7 +318,6 @@ function updateTopic($db, $data) {
     // If yes, return success response
     // If no rows affected, return appropriate message
     // If error, return error with 500 status
-
     if (empty($data['topic_id'])) {
         sendResponse([
             'success' => false,
@@ -341,13 +340,13 @@ function updateTopic($db, $data) {
     $updates = [];
     $params = [':topic_id' => $topicId];
 
-    if (!empty($data['subject'])) {
-        $updates[] = 'subject = :subject';
+    if (isset($data['subject'])) {
+        $updates[] = "subject = :subject";
         $params[':subject'] = sanitizeInput($data['subject']);
     }
 
-    if (!empty($data['message'])) {
-        $updates[] = 'message = :message';
+    if (isset($data['message'])) {
+        $updates[] = "message = :message";
         $params[':message'] = sanitizeInput($data['message']);
     }
 
@@ -358,33 +357,36 @@ function updateTopic($db, $data) {
         ], 400);
     }
 
-    $sql = "UPDATE topics SET " . implode(', ', $updates) . " WHERE topic_id = :topic_id";
+    $sql = "UPDATE topics SET " . implode(", ", $updates) . " WHERE topic_id = :topic_id";
     $stmt = $db->prepare($sql);
 
     foreach ($params as $key => $value) {
         $stmt->bindValue($key, $value);
     }
 
-    if ($affectedRows>0) {
-        sendResponse([
-            'success' => true,
-            'message' => 'Topic updated successfully'
-            'topic_id' => $topicId
-            'affected_rows' => affectedRows
-        ]);
-    }else {
-        sendResponse([
-            'success' => true,
-            'message' => 'No changes made to the topic'
-            'topic_id' => $topicId
-        ]);
-       
+    if ($stmt->execute()) {
+        $affectedRows = $stmt->rowCount();
+        if ($affectedRows > 0) {
+            sendResponse([
+                'success' => true,
+                'message' => 'Topic updated successfully',
+                'topic_id' => $topicId,
+                'affected_rows' => $affectedRows
+            ]);
         } else {
             sendResponse([
-                'success' => false,
-                'message' => 'Failed to update topic'
-            ], 500);
+                'success' => true,
+                'message' => 'No changes made to the topic',
+                'topic_id' => $topicId
+            ]);
         }
+    } else {
+        sendResponse([
+            'success' => false,
+            'message' => 'Failed to update topic'
+        ], 500);
+    }
+    
    
 
 }
@@ -447,7 +449,7 @@ function deleteTopic($db, $topicId) {
 
         sendResponse([
             'success' => true,
-            'message' => 'Topic and associated replies deleted successfully'
+            'message' => 'Topic and associated replies deleted successfully',
             'topic_id' => $topicId
         ]);
     } catch (Exception $e) {
@@ -563,7 +565,7 @@ function createReply($db, $data) {
     $topicCheck->bindValue(':topic_id', $topicId);
     $topicCheck->execute();
 
-    if (!$topicCheck ==0) {
+    if (!$topicCheck->fetch()) {
         sendResponse([
             'success' => false,
             'message' => 'Parent topic not found'
@@ -574,7 +576,7 @@ function createReply($db, $data) {
     $replyCheck->bindValue(':reply_id', $replyId);
     $replyCheck->execute();
 
-    if ($replyCheck >0) {
+    if ($replyCheck->fetch()) {
         sendResponse([
             'success' => false,
             'message' => 'Reply ID already exists'
@@ -636,7 +638,7 @@ function deleteReply($db, $replyId) {
     $checkStmt->bindValue(':reply_id', $replyId);
     $checkStmt->execute();
 
-    if (!$checkStmt->rowCount()==0) {
+    if ($checkStmt->rowCount()==0) {
         sendResponse([
             'success' => false,
             'message' => 'Reply not found'
@@ -711,8 +713,8 @@ try {
                 updateTopic($db, $data);
                 break;
             case 'DELETE':
-                $deletId = $id ?? ($data['id'] ?? null);
-                deleteTopic($db, $id);
+                $deleteId = $id ?? ($data['topic_id'] ?? null);
+                deleteTopic($db, $deleteId);
                 break;
             default:
                 sendResponse([
@@ -726,7 +728,7 @@ try {
                 if (empty($topicId)) {
                     sendResponse([
                         'success' => false,
-                        'message' => 'topic ID is required'
+                        'message' => 'Topic ID is required'
                     ], 400);
                 }
                 getRepliesByTopicId($db, $topicId);
@@ -744,7 +746,7 @@ try {
 
             case 'DELETE':
                 $deleteId = $id ?? ($data['reply_id'] ?? null);
-                deleteReply($db, $id);
+                deleteReply($db, $deleteId);
                 break;
             default:
                 sendResponse([
@@ -772,7 +774,7 @@ try {
     error_log("General error: " . $e->getMessage());
     sendResponse([
         'success' => false,
-        'message' => 'An error occurred: ' . $e->getMessage()
+        'message' => 'An error occurred' 
     ], 500);
 }
 
@@ -826,14 +828,16 @@ function sanitizeInput($data) {
     // TODO: Convert special characters to HTML entities (prevents XSS)
     
     // TODO: Return sanitized data
-    if (!is_string($data)) {
-        return $data;
-    }
 
+        if (is_null($data)) {
+            return '';
+        }
+    $data = (string)$data;
     $data = trim($data);
     $data = strip_tags($data);
     $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
     return $data;
+   
 }
 
 
