@@ -163,7 +163,9 @@ async function handleLogin(event) {
 
   //disable during submission
   const submitButton = document.getElementById("login");
-  submitButton.disabled = true;
+  if (submitButton){
+    submitButton.disabled = true;
+  }
 
   try {
     const result = await apiLogin(email, password);
@@ -185,13 +187,17 @@ async function handleLogin(event) {
 
     }else{
       displayMessage(result.message || "Login failed. Please try again.", "error");
-      submitButton.disabled = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
     }
 
   }catch (error) {
     console.error('Login error:', error);
     displayMessage("Network error. Please check your connection.", "error");
-    submitButton.disabled = false;
+    if (submitButton) {
+        submitButton.disabled = false;
+      }
   }
 
 
