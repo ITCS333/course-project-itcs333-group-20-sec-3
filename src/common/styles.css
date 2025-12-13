@@ -41,7 +41,6 @@ header h1 {
     letter-spacing: 1px;
 }
 
-/* Main Layout */
 main {
     max-width: 1200px;
     margin: 0 auto;
@@ -50,7 +49,6 @@ main {
     gap: 2rem;
 }
 
-/* Sections */
 section {
     background: var(--card);
     border: 1px solid rgba(138, 43, 226, 0.2);
@@ -309,7 +307,6 @@ a:hover {
     text-shadow: 0 0 8px rgba(157, 78, 221, 0.2);
 }
 
-/* Navigation links */
 #nav-links {
     list-style: none;
     display: grid;
@@ -330,7 +327,6 @@ a:hover {
     border-color: var(--purple);
 }
 
-/* Header styling */
 header {
     display: flex;
     justify-content: space-between;
