@@ -23,15 +23,7 @@ const weekForm = document.querySelector('#week-form');
 const weeksTableBody = document.querySelector('#weeks-tbody');
 
 // --- Functions ---
-async function loadWeeks() {
-  const res = await fetch("api/index.php?resource=weeks");
-  const data = await res.json();
 
-  console.log(data); // تتأكدين إنه شغال
-
-}
-
-loadWeeks();
 
 /**
  * TODO: Implement the createWeekRow function.
@@ -58,13 +50,13 @@ function createWeekRow(week) {
   const editButton = document.createElement('button');
   editButton.textContent = 'Edit'; 
   editButton.classList.add('edit-btn');
-  editButton.setAttribute('data-id', week.id);
+ editButton.setAttribute('data-id', week.week_id);
   actionTd.appendChild(editButton);
 
   const deleteButton = document.createElement('button');
   deleteButton.textContent = 'Delete'; 
   deleteButton.classList.add('delete-btn');
-  deleteButton.setAttribute('data-id', week.id);
+ deleteButton.setAttribute('data-id', week.week_id);
   actionTd.appendChild(deleteButton);
 
   tr.appendChild(actionTd);
@@ -123,12 +115,13 @@ function handleAddWeek(event) {
   const links = linksTextarea.value.trim().split('\n').map(link => link.trim()).filter(link => link !== '');
 
   const newWeek = {
-    id: `week_${Date.now()}`,
-    title: title,
-    startDate: startDate,
-    description: description,
-    links: links
-  };
+  week_id: `week_${Date.now()}`,
+  title: title,
+  start_date: startDate,
+  description: description,
+  links: links
+};
+
 
   weeks.push(newWeek);
 
@@ -151,7 +144,8 @@ function handleTableClick(event) {
   // ... your implementation here ...
   if (event.target.classList.contains('delete-btn')) {
     const weekId = event.target.getAttribute('data-id');
-    weeks = weeks.filter(week => week.id !== weekId);
+   weeks = weeks.filter(week => week.week_id !== weekId);
+
     renderTable();
   }
 }
@@ -167,16 +161,22 @@ function handleTableClick(event) {
  * 5. Add the 'click' event listener to `weeksTableBody` (calls `handleTableClick`).
  */
 async function loadAndInitialize() {
-  // ... your implementation here ...
-  const response = await fetch('weeks.json');
-  weeks = await response.json();
+  try {
+    const res = await fetch("api/index.php?resource=weeks");
+    const result = await res.json();
 
-  renderTable();
+    weeks = result.data || [];
+    renderTable();
 
-  weekForm.addEventListener('submit', handleAddWeek);
-  weeksTableBody.addEventListener('click', handleTableClick);
+    weekForm.addEventListener('submit', handleAddWeek);
+    weeksTableBody.addEventListener('click', handleTableClick);
 
+  } catch (err) {
+    console.error(err);
+    alert("Failed to load weeks from API");
+  }
 }
+
 
 // --- Initial Page Load ---
 // Call the main async function to start the application.
