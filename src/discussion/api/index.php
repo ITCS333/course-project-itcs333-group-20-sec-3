@@ -42,7 +42,7 @@
  * 
  * Response Format: JSON
  */
-
+session_start();
 // TODO: Set headers for JSON response and CORS
 // Set Content-Type to application/json
 // Allow cross-origin requests (CORS) if needed
