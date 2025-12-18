@@ -163,13 +163,29 @@ function handleTableClick(event) {
 async function loadAndInitialize() {
   try {
     const res = await fetch("api/index.php?resource=weeks");
+
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.log("HTTP Error:", res.status, text);
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      const text = await res.text();
+      console.log("Not JSON response:", contentType, text);
+      throw new Error("Response is not JSON");
+    }
+
+  
     const result = await res.json();
 
     weeks = result.data || [];
     renderTable();
 
-    weekForm.addEventListener('submit', handleAddWeek);
-    weeksTableBody.addEventListener('click', handleTableClick);
+    weekForm.addEventListener("submit", handleAddWeek);
+    weeksTableBody.addEventListener("click", handleTableClick);
 
   } catch (err) {
     console.error(err);
