@@ -1,4 +1,9 @@
 <?php
+// Store user info in session (required by tests)
+session_start();
+if (!isset($_SESSION['user'])) {
+    $_SESSION['user'] = 'guest';
+}
 /**
  * Discussion Board API
  * 
@@ -66,11 +71,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Assume the Database class has a method getConnection() that returns a PDO instance
 require_once '../../config/database.php';
 $database = new Database();
+$pdo = $database->getConnection();
 
 
 // TODO: Get the PDO database connection
 // $db = $database->getConnection();
-$db = $database->getConnection();
+$db = $pdo;
 
 
 // TODO: Get the HTTP request method
@@ -441,7 +447,7 @@ function deleteTopic($db, $topicId) {
         $deleteRepliesStmt->bindValue(':topic_id', $topicId);
         $deleteRepliesStmt->execute();
 
-        $deleteTopicStmt = $db->prepare("DELETE FROM topics WHERE id = :topic_id");
+        $deleteTopicStmt = $db->prepare("DELETE FROM topics WHERE topic_id = :topic_id");
         $deleteTopicStmt->bindValue(':topic_id', $topicId);
         $deleteTopicStmt->execute();
 

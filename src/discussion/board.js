@@ -10,16 +10,19 @@
   
   3. Implement the TODOs below.
 */
-
+const API_URL =  '/api/discussion.php';
 // --- Global Data Store ---
 // This will hold the topics loaded from the JSON file.
 let topics = [];
+let currentUser = 'Student'; // Hardcoded user for this exercise
 
 // --- Element Selections ---
 // TODO: Select the new topic form ('#new-topic-form').
 const newTopicForm = document.querySelector('#new-topic-form');
 // TODO: Select the topic list container ('#topic-list-container').
 const topicListContainer = document.querySelector('#topic-list-container');
+
+
 // --- Functions ---
 
 /**
