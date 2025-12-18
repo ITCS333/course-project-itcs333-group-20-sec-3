@@ -67,13 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 
 // TODO: Include the database connection class
-require_once __DIR__ . '/../config/Database.php';
+
 
 
 // Assume the Database class has a method getConnection() that returns a PDO instance
 // Example: require_once '../config/Database.php';
-$database = new Database();
-
 
 
 
@@ -82,11 +80,22 @@ $database = new Database();
 //          $db = $database->getConnection();
 // TODO: Get the HTTP request method
 // Use $_SERVER['REQUEST_METHOD']
+require_once __DIR__ . '/../config/Database.php';
 
-$db = $database->getConnection();
+try {
+    $database = new Database();
+    $db = $database->getConnection();
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode([
+        "success" => false,
+        "error" => "Database connection failed"
+    ]);
+    exit;
+}
+
 $method = $_SERVER['REQUEST_METHOD'];
 $resource = $_GET['resource'] ?? 'weeks';
-
 
 
 
