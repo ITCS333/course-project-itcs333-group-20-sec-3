@@ -47,7 +47,6 @@ if (!isset($_SESSION['user'])) {
  * 
  * Response Format: JSON
  */
-
 // TODO: Set headers for JSON response and CORS
 // Set Content-Type to application/json
 // Allow cross-origin requests (CORS) if needed
@@ -137,7 +136,7 @@ function getAllTopics($db) {
     
     // TODO: Return JSON response with success status and data
     // Call sendResponse() helper function or echo json_encode directly
-    $sql = "SELECT id as topic_id, subject, message, author, DATE(created_at) as created_at FROM topics";
+    $sql = "SELECT topic_id, subject, message, author, DATE(created_at) as created_at FROM topics";
     if (!empty($_GET['search'])) {
         $search = '%' . $_GET['search'] . '%';
         $sql .= " WHERE subject LIKE :search OR message LIKE :search OR author LIKE :search";
@@ -193,7 +192,7 @@ function getTopicById($db, $topicId) {
             'message' => 'Topic ID is required'
         ], 400);
     }
-    $stmt = $db->prepare("SELECT id as topic_id, subject, message, author, DATE(created_at) as created_at FROM topics WHERE id = :topic_id");
+    $stmt = $db->prepare("SELECT topic_id, subject, message, author, DATE(created_at) as created_at FROM topics WHERE topic_id = :topic_id");
     $stmt->bindValue(':topic_id', $topicId);
     $stmt->execute();
     $topic = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -263,16 +262,17 @@ function createTopic($db, $data) {
     if ($checkStmt->fetch()) {
         sendResponse([
             'success' => false,
-            'message' => 'Topic ID already exists'
+            'message' => 'Topic ID already exists',
+            'topic_id' => $topicId
         ], 409);
     }
 
-    $sql = "INSERT INTO topics (subject, message, author) VALUES (:subject, :message, :author)";
-    $stmt = $db->prepare($sql);    
+    $sql = "INSERT INTO topics (topic_id, subject, message, author) VALUES (:topic_id, :subject, :message, :author)";
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(':topic_id', $topicId);
     $stmt->bindValue(':subject', $subject);
     $stmt->bindValue(':message', $message);
     $stmt->bindValue(':author', $author);
-
     if ($stmt->execute()) {
         $topicId = $db->lastInsertId();
         sendResponse([
@@ -363,7 +363,7 @@ function updateTopic($db, $data) {
         ], 400);
     }
 
-    $sql = "UPDATE topics SET " . implode(', ', $updates) . " WHERE id = :topic_id";
+    $sql = "UPDATE topics SET " . implode(', ', $updates) . " WHERE topic_id = :topic_id";
     $stmt = $db->prepare($sql);
 
     foreach ($params as $key => $value) {
@@ -502,7 +502,10 @@ function getRepliesByTopicId($db, $topicId) {
         ], 400);
     }
 
-    $sql = "SELECT id as reply_id, topic_id, text, author, DATE(created_at) as created_at FROM replies WHERE topic_id = :topic_id ORDER BY created_at ASC";
+    $sql = "SELECT reply_id, topic_id, text, author, DATE(created_at) as created_at 
+        FROM replies 
+        WHERE topic_id = :topic_id 
+        ORDER BY created_at ASC";
 
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':topic_id', $topicId);
@@ -652,7 +655,7 @@ function deleteReply($db, $replyId) {
         ], 404);
     }
 
-    $deleteStmt = $db->prepare("DELETE FROM replies WHERE id = :reply_id");
+    $deleteStmt = $db->prepare("DELETE FROM replies WHERE reply_id = :reply_id");
     $deleteStmt->bindValue(':reply_id', $replyId);
 
     if ($deleteStmt->execute()) {

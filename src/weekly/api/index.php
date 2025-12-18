@@ -44,6 +44,14 @@
 // Allow cross-origin requests (CORS) if needed
 // Allow specific HTTP methods (GET, POST, PUT, DELETE, OPTIONS)
 // Allow specific headers (Content-Type, Authorization)
+session_start();
+if (!isset($_SESSION['user'])) {
+    $_SESSION['user'] = [
+        'username' => 'guest',
+        'role' => 'student'
+    ];
+}
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -72,13 +80,14 @@ $database = new Database();
 // TODO: Get the PDO database connection
 // Example: $database = new Database();
 //          $db = $database->getConnection();
-
-$db = $database->getConnection();
-
-
 // TODO: Get the HTTP request method
 // Use $_SERVER['REQUEST_METHOD']
+
+$db = $database->getConnection();
 $method = $_SERVER['REQUEST_METHOD'];
+$resource = $_GET['resource'] ?? 'weeks';
+
+
 
 
 // TODO: Get the request body for POST and PUT requests
@@ -106,7 +115,55 @@ if ($method === 'POST' || $method === 'PUT') {
 // Example: ?resource=weeks or ?resource=comments
 $resource = $_GET['resource'] ?? 'weeks';
 
+try {
 
+  // ========== WEEKS ROUTES ==========
+  if ($resource === 'weeks') {
+
+    if ($method === 'GET') {
+      if (isset($_GET['week_id'])) {
+        getWeekById($db, $_GET['week_id']);
+      } else {
+        getAllWeeks($db);
+      }
+    } elseif ($method === 'POST') {
+      createWeek($db, $requestBody);
+    } elseif ($method === 'PUT') {
+      updateWeek($db, $requestBody);
+    } elseif ($method === 'DELETE') {
+      $weekId = $requestBody['week_id'] ?? ($_GET['week_id'] ?? null);
+      deleteWeek($db, $weekId);
+    } else {
+      sendResponse(['error' => 'Method not allowed'], 405);
+    }
+
+  // ========== COMMENTS ROUTES ==========
+  } elseif ($resource === 'comments') {
+
+    if ($method === 'GET') {
+      if (!isset($_GET['week_id'])) {
+        sendResponse(['error' => 'week_id is required'], 400);
+      }
+      getCommentsByWeek($db, $_GET['week_id']);
+
+    } elseif ($method === 'POST') {
+      createComment($db, $requestBody);
+
+    } elseif ($method === 'DELETE') {
+      $commentId = $requestBody['id'] ?? ($_GET['id'] ?? null);
+      deleteComment($db, $commentId);
+
+    } else {
+      sendResponse(['error' => 'Method not allowed'], 405);
+    }
+
+  } else {
+    sendResponse(['error' => 'Invalid resource'], 400);
+  }
+
+} catch (Exception $e) {
+  sendResponse(['error' => $e->getMessage()], 500);
+}
 
 // ============================================================================
 // WEEKS CRUD OPERATIONS

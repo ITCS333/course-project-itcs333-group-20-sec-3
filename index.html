@@ -22,34 +22,36 @@
 <body>
      <header>
           <h1>Welcome to the Web Development Course</h1>
+          <div id="auth-status">
+        </div>
      </header>
      <main>
           <nav>
                <h2>Site Navigation</h2>
-               <ul>
-                    <li>
-                         <a href="src/auth/login.html">Login</a>
+               <ul id="nav-links">
+                    <li id="login-li">
+                         <a href="src/auth/login.html" id="login-link">Login</a>
                     </li>
                     <li>
-                         <a href="">Admin Portal (Manage Students)</a>
+                         <a href="src/admin/manage_users.html">Admin Portal (Manage Students)</a>
                     </li>
                     <li>
-                         <a href="">Admin: Manage Resources</a>
+                         <a href="src/resources/admin.html">Admin: Manage Resources</a>
                     </li>
                     <li>
-                         <a href="">Admin: Manage Weekly Breakdown</a>
+                         <a href="src/weekly/admin.html">Admin: Manage Weekly Breakdown</a>
                     </li>
                     <li>
-                         <a href="">Admin: Manage Assignments</a>
+                         <a href="src/assignments/admin.html">Admin: Manage Assignments</a>
                     </li>
                     <li>
-                         <a href="">View Course Resources</a>
+                         <a href="src/resources/list.html">View Course Resources</a>
                     </li>
                     <li>
-                         <a href="">View Weekly Breakdown</a>
+                         <a href="src/weekly/list.html">View Weekly Breakdown</a>
                     </li>
                     <li>
-                         <a href="">View Assignments</a>
+                         <a href="src/assignments/list.html">View Assignments</a>
                     </li>
                     <li>
                          <a href="src/discussion/baord.html">General Discussion Board</a>
@@ -102,5 +104,98 @@
         <!-- End of the 'nav' element. -->
 
     <!-- End of 'main'. -->
+
+    <script>
+        // Check if user is logged in
+        async function checkAuthStatus() {
+            try {
+                // Try to get user info from session
+                const response = await fetch('/src/auth/api/index.php?check=1', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.user) {
+                        // User is logged in
+                        updateUIForLoggedInUser(data.user);
+                        return data.user;
+                    }
+                }
+            } catch (error) {
+                console.log('Auth check:', error.message);
+            }
+            
+            // User is not logged in
+            updateUIForLoggedOutUser();
+            return null;
+        }
+        
+        function updateUIForLoggedInUser(user) {
+            const authStatus = document.getElementById('auth-status');
+            const loginLi = document.getElementById('login-li');
+            const loginLink = document.getElementById('login-link');
+            
+            // Update auth status display
+            if (authStatus) {
+                authStatus.innerHTML = `
+                    <span style="margin-right: 15px; color: #666;">
+                        Welcome, ${user.name} (${user.is_admin ? 'Admin' : 'Student'})
+                    </span>
+                    <button id="logout-btn" class="logout-btn">Logout</button>
+                `;
+                
+                const logoutBtn = document.getElementById('logout-btn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', handleLogout);
+                }
+            }
+            
+          }
+        
+        function updateUIForLoggedOutUser() {
+          const authStatus = document.getElementById('auth-status');
+          const loginLi = document.getElementById('login-li');
+          const loginLink = document.getElementById('login-link');
+            
+          if (authStatus) {
+               authStatus.innerHTML = '';
+          }
+            
+          if (loginLink) {
+               loginLink.textContent = 'Login';
+               loginLink.href = 'src/auth/login.html';
+          }
+        }
+        
+        async function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    const response = await fetch('/src/auth/api/logout.php', {
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+                    
+                    if (response.ok) {
+                        updateUIForLoggedOutUser();
+                        
+                        alert('Logged out successfully!');
+                        
+                        window.location.reload();
+                    } else {
+                        alert('Logout failed. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Network error. Please check your connection.');
+                }
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+        });
+    </script>
 </body>
 </html>

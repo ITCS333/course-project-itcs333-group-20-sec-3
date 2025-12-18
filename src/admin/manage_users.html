@@ -32,13 +32,13 @@
             <form action="#" id="password-form">
                 <fieldset>
                     <legend>Password Update</legend>
-                    <label for="current-password"></label>
+                    <label for="current-password">Current Password</label>
                     <input type="password" id="current-password" required>
 
-                    <label for="new-password"></label>
+                    <label for="new-password">New Password</label>
                     <input type="password" id="new-password" minlength="8" required>
 
-                    <label for="confirm-password"></label>
+                    <label for="confirm-password">Confirm Password</label>
                     <input type="password" id="confirm-password" required>
 
                     <button type="submit" id="change">Update Password</button>
@@ -50,7 +50,7 @@
             <h2>Manage Students</h2>
 
             <label for="search-input">Search Students</label>
-            <input type="text" id="search-input" placeholder="Search by name..">
+            <input type="text" id="search-input" placeholder="Search by name or email..">
 
             <details>
                 <summary>Add New Student</summary>
@@ -60,13 +60,13 @@
                         <legend>New Student Information</legend>
 
                         <label for="student-name"></label>
-                        <input type="text" id="student-name" required>
+                        <input type="text" id="student-name" placeholder="Enter student's full name" required>
 
                         <!-- <label for="student-id"></label> -->
                         <!-- <input type="text" id="student-id" required> // no student id in table users -->
 
                         <label for="student-email"></label>
-                        <input type="email" id="student-email" required>
+                        <input type="email" id="student-email" placeholder="student@example.com" required>
 
                         <label for="default-password"></label>
                         <input type="text" id="default-password" value="password123" required>

@@ -37,6 +37,23 @@ const commentList = document.getElementById('comment-list');
 const commentForm = document.getElementById('comment-form');
 const newCommentText = document.getElementById('new-comment-text');
 
+async function loadWeekDetails() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get("id");
+
+  const res = await fetch(`api/index.php?resource=weeks&week_id=${id}`);
+  const data = await res.json();
+
+  console.log(data);
+}
+fetch('http://localhost/api/weeks.php?resource=weeks&week_id=week_1')
+  .then(res => res.json())
+  .then(data => {
+     console.log(data);
+     document.getElementById("week-title").textContent = data.data.title;
+  });
+
+loadWeekDetails();
 
 /**
  * TODO: Implement the getWeekIdFromURL function.

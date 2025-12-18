@@ -26,15 +26,15 @@
 
 session_start(); //already started the session, but loading it now
 
+//check if user is authenticated and is admin
 if (isset($_GET['verify'])) {
-    // Simple session verification endpoint
     if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
         sendResponse(['success' => false, 'message' => 'Not authenticated'], 401);
         exit;
     }
     
     if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
-        sendResponse(['success' => false, 'message' => 'Not admin'], 403);
+        sendResponse(['success' => false, 'message' => 'Not authorized, Admin access required'], 403);
         exit;
     }
     
@@ -148,7 +148,7 @@ function getStudents($db, $queryParams) { //i added queryparams it wasn't there
     $sort = $queryParams['sort'] ?? 'name';
     $order = $queryParams['order'] ?? 'asc';
 
-    $allowedSortFields = ['name', 'id', 'email'];
+    $allowedSortFields = ['name', 'id', 'email', 'created_at'];
     $sort = in_array($sort, $allowedSortFields) ? $sort: 'name';
 
     $order = strtolower($order) === 'desc' ? 'DESC' : 'ASC';
@@ -255,7 +255,6 @@ function createStudent($db, $data) {
     // If duplicate found, return error response with 409 status (Conflict)
     $checkSql = "SELECT id FROM users WHERE email = :email";
     $checkStmt = $db->prepare($checkSql);
-    $checkStmt->bindParam(':id', $studentId);
     $checkStmt->bindParam(':email', $email);
     $checkStmt->execute();
 
@@ -508,7 +507,7 @@ function changePassword($db, $data) {
     // Use password_verify() to check if current_password matches the hash
     // If verification fails, return error response with 401 status (Unauthorized)
     if (!password_verify($currentPassword, $student['password'])){
-        sendResponse(['success' => false, 'message' => 'Current password is incorrect'], 401);
+        sendResponse(['success' => false, 'message' => 'Current password is incorrect'], 500); //should be 500, since user authorized but while changing password
         return;
     }
     

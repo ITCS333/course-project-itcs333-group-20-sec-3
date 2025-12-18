@@ -13,6 +13,40 @@
 // Sessions allow us to store user data across multiple pages
 session_start();
 
+if (isset($_GET['check'])) {
+    header('Content-Type: application/json');
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Credentials: true');
+    
+    if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+        echo json_encode([
+            'success' => true,
+            'user' => [
+                'id' => $_SESSION['user_id'],
+                'name' => $_SESSION['user_name'],
+                'email' => $_SESSION['user_email'],
+                'is_admin' => $_SESSION['is_admin']
+            ]
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Not logged in'
+        ]);
+    }
+    exit;
+}
+
+// Check if user is already logged in
+if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => false,
+        'message' => 'You are already logged in. Please logout first.'
+    ]);
+    exit;
+}
+
 
 // --- Set Response Headers ---
 // TODO: Set the Content-Type header to 'application/json'
@@ -29,6 +63,7 @@ header('Access-Control-Allow-Credentials: true');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
+
 
 
 // --- Check Request Method ---

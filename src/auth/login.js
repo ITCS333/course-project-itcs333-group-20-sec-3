@@ -13,8 +13,8 @@
   3. Implement the JavaScript functionality as described in the TODO comments.
 */
 const API_URL = 'http://localhost:8000';
-const LOGIN_ENDPOINT = API_URL + '/auth/index.php';
-
+const LOGIN_ENDPOINT = '/src/auth/api/index.php';
+ 
 // --- Element Selections ---
 // We can safely select elements here because 'defer' guarantees
 // the HTML document is parsed before this script runs.
@@ -29,6 +29,36 @@ let passwordInput = document.getElementById("password");
 let messageContainer = document.getElementById("message-container");
 // --- Functions ---
 
+async function checkIfAlreadyLoggedIn() {
+    try {
+        const response = await fetch('/src/auth/api/index.php?check=1', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.user) {
+                displayMessage(`You are already logged in as ${data.user.name}. Please logout first.`, "error");
+                
+                if (loginForm) loginForm.style.display = 'none';
+                
+                setTimeout(() => {
+                    if (data.user.is_admin) {
+                        window.location.href = "../../admin/manage_users.html";
+                    } else {
+                        window.location.href = "../../../index.html";
+                    }
+                }, 3000);
+                
+                return true;
+            }
+        }
+    } catch (error) {
+        console.log('Auth check:', error.message);
+    }
+    return false;
+}
 
 async function apiLogin(email, password) {
     const response = await fetch(LOGIN_ENDPOINT, {
@@ -133,7 +163,9 @@ async function handleLogin(event) {
 
   //disable during submission
   const submitButton = document.getElementById("login");
-  submitButton.disabled = true;
+  if (submitButton){
+    submitButton.disabled = true;
+  }
 
   try {
     const result = await apiLogin(email, password);
@@ -149,20 +181,23 @@ async function handleLogin(event) {
         if (result.user.is_admin) {
           window.location.href = "../admin/manage_users.html";
         } else {
-          window.location.href = "../resources/details.html"; //CHECK WHERE STUDENNTS SHOULD GO ON LOGIN
+          window.location.href = "../../../index.html";
         }
       }, 1500);
 
-      //redirect to users page or admin page based on credentials DOOOk
     }else{
       displayMessage(result.message || "Login failed. Please try again.", "error");
-      submitButton.disabled = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
     }
 
   }catch (error) {
     console.error('Login error:', error);
     displayMessage("Network error. Please check your connection.", "error");
-    submitButton.disabled = false;
+    if (submitButton) {
+        submitButton.disabled = false;
+      }
   }
 
 
