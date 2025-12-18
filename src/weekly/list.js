@@ -71,7 +71,7 @@ async function loadWeeks() {
     listSection.appendChild(weekArticle);
   });             
 }
-
+ 
 // --- Initial Page Load ---
 // Call the function to populate the page.
 loadWeeks();
