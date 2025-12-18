@@ -38,6 +38,7 @@
 // ============================================================================
 // HEADERS AND CORS CONFIGURATION
 // ============================================================================
+session_start();
 
 // TODO: Set Content-Type header to application/json
 header('Content-Type: application/json; charset=UTF-8');
@@ -432,13 +433,13 @@ function getCommentsByAssignment($db, $assignmentId) {
  */
 function createComment($db, $data) {
     // TODO: Validate required fields
-    if (empty($data['assignment_id']) || empty($data['author']) || empty($data['text'])) {
+    if (empty($data['assignment_id']) || empty($data['text'])) {
         sendResponse(['success'=>false, 'message'=>'Missing required fields'], 400);
     }
     
     // TODO: Sanitize input data
     $assignment_id = sanitizeInput($data['assignment_id']);
-    $author = sanitizeInput($data['author']);
+    $author = $_SESSION['user'];
     $text = sanitizeInput($data['text']);
     
     // TODO: Validate that text is not empty after trimming
