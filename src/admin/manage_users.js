@@ -183,6 +183,7 @@ async function changePassword(passwordData) {
 
 function createStudentRow(student) {
   const row = document.createElement("tr");
+  row.dataset.id = student.id;
 
   const nameCell = document.createElement("td");
   nameCell.textContent = student.name;
@@ -364,6 +365,21 @@ async function handleTableClick(event) {
       alert(`Error: ${error.message}`);
     }
   }
+
+  if (event.target.classList.contains("edit-btn")) {
+    const studentId = event.target.getAttribute("data-id");
+    const row = event.target.closest('tr');
+    
+    const cells = row.querySelectorAll('td');
+    const studentData = {
+      id: studentId,
+      name: cells[0].textContent,
+      email: cells[1].textContent,
+      created_at: cells[2].textContent
+    };
+    
+    openEditModal(studentData);
+  }
 }
 
 
@@ -511,6 +527,99 @@ async function loadStudentsAndInitialize() {
   }
 }
 
+function openEditModal(student) {
+    const modalHTML = `
+        <div class="modal-overlay" id="edit-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Edit Student: ${student.name}</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-student-form">
+                        <input type="hidden" id="edit-student-id" value="${student.id}">
+                        
+                        <div class="form-group">
+                            <label for="edit-student-name">Student Name</label>
+                            <input type="text" id="edit-student-name" value="${student.name}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit-student-email">Email Address</label>
+                            <input type="email" id="edit-student-email" value="${student.email}" required>
+                        </div>
+                        
+                        <div class="modal-actions">
+                            <button type="button" class="cancel-btn">Cancel</button>
+                            <button type="submit" class="save-btn">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Get modal elements
+    const modal = document.getElementById('edit-modal');
+    const closeBtn = modal.querySelector('.modal-close');
+    const cancelBtn = modal.querySelector('.cancel-btn');
+    const editForm = document.getElementById('edit-student-form');
+    
+    // Close modal functions
+    const closeModal = () => {
+        document.body.removeChild(modal);
+    };
+    
+    // Event listeners for closing
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    
+    // Close when clicking outside modal
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // Handle form submission
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const studentId = document.getElementById('edit-student-id').value;
+        const name = document.getElementById('edit-student-name').value.trim();
+        const email = document.getElementById('edit-student-email').value.trim();
+        
+        if (!name || !email) {
+            alert('Please fill in all fields');
+            return;
+        }
+        
+        try {
+            // Show loading state
+            const saveBtn = editForm.querySelector('.save-btn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+            
+            await updateStudent({
+                id: studentId,
+                name: name,
+                email: email
+            });
+            
+            alert('Student updated successfully!');
+            closeModal();
+            await loadAndRenderStudents(); // Refresh the table
+            
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Changes';
+        }
+    });
+}
 // --- Initial Page Load ---
 // Call the main async function to start the application.
 loadStudentsAndInitialize();
